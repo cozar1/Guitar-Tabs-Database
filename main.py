@@ -9,7 +9,7 @@ cursor = conn.cursor()
 
 # Option to search tabs from id, name or artist
 def search_tab(keyword):
-    cursor.execute("SELECT name, artist, tab FROM guitar_tabs WHERE name LIKE ? OR artist LIKE ?", ('%' + keyword + '%', '%' + keyword + '%'))
+    cursor.execute("SELECT name, artist, tab, song_genre.genre FROM guitar_tabs WHERE name LIKE ? OR artist LIKE ? JOIN song_genre ON guitar_tabs.genre_id = song_genre.id", (('%' + keyword + '%'), ('%' + keyword + '%')))
     tab = cursor.fetchone()
     print(Fore.YELLOW + '')
     return tab
@@ -22,10 +22,11 @@ def display_tab(tab):
         print(Fore.BLUE + '-' * 60)
         print(Fore.MAGENTA + tab[0])
         print(Fore.CYAN + tab[1])
+        print(Fore.RED + tab[3])
         print(Fore.YELLOW + tab[2])
         print(Fore.BLUE + '-' * 60)
  
-# main code
+ # main code
 def main():
     print((Fore.CYAN + '=' + Fore.MAGENTA + '=') * 20)
     print(' ' * 10 + Fore.YELLOW + 'Welcome To Tabmaster')
