@@ -32,12 +32,10 @@ def display_song_information(search_term):
     if not search_term:
         print("\nNo matching tab found.\n")
     else:
-        print('')
         for name, artist, song_genre in search_term:                
             space = '.' * (SONG_INFO_SPACING - len(name))
             space2 = '.' * (SONG_INFO_SPACING - len(artist))
-            print(f'> {name} {space} {artist} {space2} {song_genre}')
-        print('')
+            print(f'\n> {name} {space} {artist} {space2} {song_genre}\n')
 
 # gets the users input for the song/tab that needs to be displayed
 def song_input():
@@ -99,6 +97,9 @@ Please enter an option:
         # exits the program
         elif action == '5' or 'exit' in action:
             break        
+
+        elif action:
+            print('\nyou monkey this isnt an option')
 
     # Closes the database connection
     conn.close()
