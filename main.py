@@ -1,7 +1,6 @@
 # Guitar Tab database by Cohen Voight
 
 import sqlite3
-from colorama import Fore, Style
 
 # Connect to the database
 conn = sqlite3.connect('guitar_tabs.db')
@@ -12,47 +11,70 @@ cursor = conn.cursor()
 def search_tab(keyword):
     cursor.execute(f"SELECT name, artist, tab, song_genre.genre FROM guitar_tabs JOIN song_genre ON guitar_tabs.genre_id = song_genre.id WHERE name LIKE \"{'%' + keyword + '%'}\";")
     tab = cursor.fetchone()
-    print(Fore.YELLOW + '')
+    print('')
     return tab
 
 # displays the tab when succesfully found a search
 def display_tab(tab):
     if not tab:
-        print(Fore.RED + "No matching tab found.")
+        print("No matching tab found.")
     else:
-        print(Fore.WHITE + '-' * 60)
-        space = ' ' * (20 - len(tab[0]))
-        space2 = ' ' * (20 - len(tab[1]))
-        print(f'{Fore.CYAN} {tab[0]} {Fore.YELLOW} {space} {tab[1]} {space2} {Fore.RED} {tab[3]}')
-        print(Fore.WHITE + '-' * 60)
-        print(Fore.YELLOW + tab[2])
-        print(Fore.WHITE + '-' * 60)
+        print('#' * 60)
+        print(f'> name: {tab[0]}')
+        print(f'> Band: {tab[1]}')
+        print(f'> Genre: {tab[3]}')
+        print('-' * 60)
+        print(tab[2])
+        print('#' * 60)
         
  
  # main code
 def main():
-    print((Fore.CYAN + '=' + Fore.MAGENTA + '=') * 20)
-    print(' ' * 10 + Fore.YELLOW + 'Welcome To Tabmaster')
-    print((Fore.MAGENTA + '=' + Fore.CYAN + '=') * 20)
+    print(('=') * 40)
+    print(' ' * 10 +'Welcome To Tabmaster')
+    print(('=') * 40)
     while True:
-        action = input(Fore.BLUE + "\nEnter 'search to search for a tab and 'exit' to exit the program' ").strip().lower()
+        print('Please enter an option:')
+        print('1. Search for a tab by name')
+        print('2. Search for a tab by  Band/Artist')
+        print('3. Search for a tab by Genre')
+        print('4. Show all tabs')
+        print('5. Exit')
+        action = input("> ").strip().lower()
         #breaks code if exited
-        if action == 'exit':
-            print(Style.RESET_ALL)
+        if action == '5':
             break
+        
+        elif action == '2':
+            artist = input('Enter Artist/Band Name: ')
+            cursor.execute(f"SELECT name, artist FROM guitar_tabs WHERE artist LIKE \"{'%' + artist + '%'}\";")
+            search_thing = cursor.fetchall() 
+            print('')           
+            for name, artist in search_thing:                
+                space = '.' * (30 - len(name))
+                print(f'> {name} {space} {artist}')
+            print('')           
+                
+            print('Enter a tab name to display: ')
+            search_term = input("> ").strip()
+            tab = search_tab(search_term)
+            display_tab(tab)
+
 
         # searches for a tab option
-        elif action == 'search':
-            cursor.execute("SELECT name, artist FROM guitar_tabs")
+        elif action == '1':
+            name = input('Enter Tab Name: ')
+            cursor.execute(f"SELECT name, artist FROM guitar_tabs WHERE name LIKE \"{'%' + name + '%'}\";")
             search_thing = cursor.fetchall()
-            print(Fore.CYAN + '')
+            print('')  
             for name, artist in search_thing:
-                print(Fore.WHITE + '-'*60)
-                space = ' ' * (20 - len(name))
-                print(f'{Fore.CYAN} {name} {Fore.YELLOW} {space} {artist}')
-                print(Fore.WHITE + '-'*60)
+                space = '.' * (30 - len(name))
+                print(f'> {name} {space} {artist}\n')
+            print('')           
 
-            search_term = input(Fore.YELLOW + "Enter a tab name to search: ").strip()
+
+            print('Enter a tab name to display: ')
+            search_term = input("> ").strip()
             tab = search_tab(search_term)
             display_tab(tab)
 
