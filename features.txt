@@ -1,0 +1,2 @@
+.Entering nothing brings you back to the start
+. You can enter the number of the option or one of the keywords

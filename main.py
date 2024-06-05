@@ -1,13 +1,15 @@
 # Guitar Tab database by Cohen Voight
+# Guitar tabs are pretty much just more simple music sheets for guitars that give the instructions of how to play the song
 
 import sqlite3
+
+SONG_INFO_SPACING = 30
 
 # Connect to the database
 conn = sqlite3.connect('guitar_tabs.db')
 cursor = conn.cursor()
 
-
-# Option to search tabs from id, name or artist
+# Gets the Guitar tab information to print
 def search_tab(keyword):
     cursor.execute(f"SELECT name, artist, tab, song_genre.genre FROM guitar_tabs JOIN song_genre ON guitar_tabs.genre_id = song_genre.id WHERE name LIKE \"{'%' + keyword + '%'}\";")
     tab = cursor.fetchone()
@@ -19,64 +21,84 @@ def display_tab(tab):
     if not tab:
         print("No matching tab found.")
     else:
-        print('#' * 60)
         print(f'> name: {tab[0]}')
         print(f'> Band: {tab[1]}')
         print(f'> Genre: {tab[3]}')
-        print('-' * 60)
         print(tab[2])
-        print('#' * 60)
+        print('Scroll up to view tab information:')
+
+# displays the song information with the name, artist and genre
+def display_song_information(search_term):
+    if not search_term:
+        print("\nNo matching tab found.\n")
+    else:
+        print('')
+        for name, artist, song_genre in search_term:                
+            space = '.' * (SONG_INFO_SPACING - len(name))
+            space2 = '.' * (SONG_INFO_SPACING - len(artist))
+            print(f'> {name} {space} {artist} {space2} {song_genre}')
+        print('')
+
+# gets the users input for the song/tab that needs to be displayed
+def song_input():
+    print('Enter a tab/song name to display: ')
+    search_term = input("> ").strip()
+    if search_term:
+        tab = search_tab(search_term)
+        display_tab(tab)
         
- 
- # main code
+# main code
 def main():
-    print(('=') * 40)
-    print(' ' * 10 +'Welcome To Tabmaster')
-    print(('=') * 40)
+
+    print('\nWelcome To Tabmaster')
+
     while True:
-        print('Please enter an option:')
-        print('1. Search for a tab by name')
-        print('2. Search for a tab by  Band/Artist')
-        print('3. Search for a tab by Genre')
-        print('4. Show all tabs')
-        print('5. Exit')
+        print('''
+Please enter an option:
+1. Search for a tab by name
+2. Search for a tab by Band/Artist
+3. Search for a tab by Genre
+4. Show all tabs
+5. Exit''')
         action = input("> ").strip().lower()
-        #breaks code if exited
-        if action == '5':
-            break
-        
-        elif action == '2':
-            artist = input('Enter Artist/Band Name: ')
-            cursor.execute(f"SELECT name, artist FROM guitar_tabs WHERE artist LIKE \"{'%' + artist + '%'}\";")
-            search_thing = cursor.fetchall() 
-            print('')           
-            for name, artist in search_thing:                
-                space = '.' * (30 - len(name))
-                print(f'> {name} {space} {artist}')
-            print('')           
-                
-            print('Enter a tab name to display: ')
-            search_term = input("> ").strip()
-            tab = search_tab(search_term)
-            display_tab(tab)
-
-
-        # searches for a tab option
-        elif action == '1':
+             
+        # searches for songs by the name
+        if action == '1':
             name = input('Enter Tab Name: ')
-            cursor.execute(f"SELECT name, artist FROM guitar_tabs WHERE name LIKE \"{'%' + name + '%'}\";")
-            search_thing = cursor.fetchall()
-            print('')  
-            for name, artist in search_thing:
-                space = '.' * (30 - len(name))
-                print(f'> {name} {space} {artist}\n')
-            print('')           
+            if name:
+                cursor.execute(f"SELECT name, artist, song_genre.genre FROM guitar_tabs JOIN song_genre ON guitar_tabs.genre_id = song_genre.id WHERE name LIKE \"{'%' + name + '%'}\";")
+                search_term = cursor.fetchall()
+                display_song_information(search_term)
+                song_input()
+        
+        # searches for songs by the band/artist
+        elif action == '2' or 'band' in action or 'artist' in action:
+            artist = input('Enter Artist/Band Name: ')
+            if artist:
+                cursor.execute(f"SELECT name, artist, song_genre.genre FROM guitar_tabs JOIN song_genre ON guitar_tabs.genre_id = song_genre.id WHERE artist LIKE \"{'%' + artist + '%'}\";")
+                search_term = cursor.fetchall()
+                display_song_information(search_term)
+                song_input()
 
+        # searches for songs by the genre
+        elif action == '3' or 'genre' in action:
+            genre = input('Enter Genre Name: ')
+            if genre:
+                cursor.execute(f"SELECT name, artist, song_genre.genre FROM guitar_tabs JOIN song_genre ON guitar_tabs.genre_id = song_genre.id WHERE song_genre.genre LIKE \"{'%' + genre + '%'}\";")
+                search_term = cursor.fetchall()
+                display_song_information(search_term)
+                song_input()
+        
+        # displays all songs
+        elif action == '4' or 'all' in action:
+                cursor.execute(f"SELECT name, artist, song_genre.genre FROM guitar_tabs JOIN song_genre ON guitar_tabs.genre_id = song_genre.id")
+                search_term = cursor.fetchall()
+                display_song_information(search_term)
+                song_input()
 
-            print('Enter a tab name to display: ')
-            search_term = input("> ").strip()
-            tab = search_tab(search_term)
-            display_tab(tab)
+        # exits the program
+        elif action == '5' or 'exit' in action:
+            break        
 
     # Closes the database connection
     conn.close()
